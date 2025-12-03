@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tambola 1.0.0</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 30px;
+      color: #333;
+      background: linear-gradient(135deg, #ece9e6, #ffffff);
+      position: relative;
+    }
+    h1 { font-size: 2.2rem; margin-bottom: 5px; text-align: center; }
+    #headerSection { display: flex; justify-content: center; align-items: flex-start; gap: 50px; margin-bottom: 20px; }
+    #winners { background: #f0f0f0; padding: 15px 20px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: right; display: flex; flex-direction: column; justify-content: center; }
+    #winners p { margin: 10px 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+    #winners input { width: 140px; padding: 5px 8px; border-radius: 6px; border: 1px solid #ccc; text-align: right; }
+    #currentSection { text-align: center; position: relative; }
+    #current { font-size: 4rem; font-weight: bold; color: #0077b6; transition: font-size 0.3s; margin-bottom: 20px; }
+    button { background: #0077b6; color: white; padding: 12px 26px; border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer; margin: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.15); transition: 0.2s; }
+    button:hover { background: #023e8a; transform: translateY(-2px); }
+    #resetBtn { position: absolute; top: 0; right: 0; background: #d00000; }
+    #board { display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; max-width: 650px; margin: 0 auto; }
+    .cell { padding: 14px; background: white; border-radius: 10px; font-size: 1.1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; text-align: center; }
+    .cell:hover { transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .called { background: #2a9d8f !important; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transform: scale(1.2); font-size: 1.3rem; transition: transform 0.3s, font-size 0.3s; }
+  </style>
+</head>
+<body>
+  <h1>Lets play Tambola 🎯</h1>
+  <button id="resetBtn" onclick="resetGame()">Reset Game</button>
+  <div id="headerSection">
+    <div id="winners">
+      <p>First Row:  <input type="text" id="firstRow" placeholder="Enter name" /></p>
+      <p>Second Row: <input type="text" id="secondRow" placeholder="Enter name" /></p>
+      <p>Third Row:  <input type="text" id="thirdRow" placeholder="Enter name" /></p>
+      <p>Full House: <input type="text" id="fullHouse" placeholder="Enter name" /></p>
+    </div>
+    <div id="currentSection">
+      <h2 id="current">Press Start</h2>
+      <button onclick="callNumber()">Next Number</button>
+    </div>
+  </div>
+  <div id="board"></div>
+
+  <script>
+    const numbers = Array.from({ length: 90 }, (_, i) => i + 1);
+    let called = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
+
+    ['firstRow','secondRow','thirdRow','fullHouse'].forEach(id => {
+      const input = document.getElementById(id);
+      input.value = localStorage.getItem(id) || '';
+      input.addEventListener('input', () => { localStorage.setItem(id, input.value); });
+    });
+
+    function createBoard() {
+      const board = document.getElementById('board');
+      numbers.forEach(num => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.id = 'num-' + num;
+        cell.textContent = num;
+        board.appendChild(cell);
+      });
+    }
+
+    function applyMemory() {
+      called.forEach(n => {
+        const el = document.getElementById('num-' + n);
+        if (el) el.classList.add('called');
+      });
+      if (called.length > 0) {
+        document.getElementById('current').textContent = 'Last: ' + called[called.length - 1];
+      }
+    }
+
+    function callNumber() {
+      const remaining = numbers.filter(n => !called.includes(n));
+      if (remaining.length === 0) {
+        document.getElementById('current').textContent = 'Game Finished! 🎉';
+        return;
+      }
+      const next = remaining[Math.floor(Math.random() * remaining.length)];
+      called.push(next);
+      localStorage.setItem('calledNumbers', JSON.stringify(called));
+      document.getElementById('current').textContent = 'Number: ' + next;
+      document.getElementById('num-' + next).classList.add('called');
+    }
+
+    function resetGame() {
+      called = [];
+      localStorage.removeItem('calledNumbers');
+      document.getElementById('current').textContent = 'Press Start';
+      numbers.forEach(n => {
+        const el = document.getElementById('num-' + n);
+        if (el) el.classList.remove('called');
+      });
+      ['firstRow','secondRow','thirdRow','fullHouse'].forEach(id => {
+        const input = document.getElementById(id);
+        input.value = '';
+        localStorage.removeItem(id);
+      });
+    }
+
+    createBoard();
+    applyMemory();
+  </script>
+</body>
+</html>
