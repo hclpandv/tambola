@@ -72,12 +72,12 @@ h1 { text-align:center; margin:10px 0; font-size:2rem; }
 #boardContainer {
   flex:1 1 auto;
   overflow:auto;
-  padding:10px;
+  padding: 20px;
 }
 
 #board {
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(50px,1fr));
+  grid-template-columns:repeat(15, minmax(50px,1fr));
   gap:6px;
   width:100%;
 }
@@ -85,13 +85,15 @@ h1 { text-align:center; margin:10px 0; font-size:2rem; }
 #board .cell {
   background:white;
   border-radius:8px;
+  aspect-ratio: 1 / 1; /* keeps height = width */
   padding:12px;
-  font-size:1.2rem;
+  font-size:2rem;
   font-weight:500;
   text-align:center;
   box-shadow:0 2px 4px rgba(0,0,0,0.1);
   transition:0.3s;
 }
+
 #board .cell:hover { transform:scale(1.05); box-shadow:0 4px 10px rgba(0,0,0,0.15); }
 
 .called {
