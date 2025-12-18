@@ -1,10 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tambola 1.0.0</title>
+  <meta charset="UTF-8" />
+  <title>Tambola Ticket</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .ticket {
+      max-width: 420px;
+      margin: auto;
+    }
+    .cell {
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-weight: 600;
+      user-select: none;
+    }
+    .cell.crossed {
+      background-color: #198754;
+      color: #fff;
+      text-decoration: line-through;
+    }
+  </style>
+</head>
+<body class="bg-light">
 
-<body>
-<h1>Tambola ticket</h1>
+<div class="container py-4">
+  <div class="card shadow ticket">
+    <div class="card-body">
+      <h4 class="text-center mb-3">🎫 Tambola Ticket</h4>
+      <p class="text-center text-muted small" id="ticketId"></p>
+
+      <table class="table table-bordered text-center align-middle">
+        <tbody id="ticket"></tbody>
+      </table>
+
+      <div class="d-grid gap-2">
+        <button class="btn btn-outline-primary" onclick="resetTicket()">Reset Ticket</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const userKey = 'tambola_' + (localStorage.getItem('tambolaUser') || crypto.randomUUID());
+localStorage.setItem('tambolaUser', userKey.replace('tambola_', ''));
+
+document.getElementById('ticketId').innerText = `Ticket ID: ${userKey.replace('tambola_', '').slice(0, 8)}`;
+
+function generateTicket() {
+  const rows = 3, cols = 9;
+  let ticket = Array.from({ length: rows }, () => Array(cols).fill(''));
+  let numbers = Array.from({ length: 90 }, (_, i) => i + 1);
+
+  for (let r = 0; r < rows; r++) {
+    let colsToFill = shuffle([...Array(cols).keys()]).slice(0, 5);
+    colsToFill.forEach(c => {
+      let rangeStart = c * 10 + 1;
+      let rangeEnd = c === 8 ? 90 : c * 10 + 10;
+      let available = numbers.filter(n => n >= rangeStart && n <= rangeEnd);
+      let num = available[Math.floor(Math.random() * available.length)];
+      ticket[r][c] = num;
+      numbers = numbers.filter(n => n !== num);
+    });
+  }
+  return ticket;
+}
+
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+function loadTicket() {
+  let data = JSON.parse(localStorage.getItem(userKey));
+  if (!data) {
+    data = { ticket: generateTicket(), crossed: [] };
+    localStorage.setItem(userKey, JSON.stringify(data));
+  }
+  render(data);
+}
+
+function render(data) {
+  const tbody = document.getElementById('ticket');
+  tbody.innerHTML = '';
+
+  data.ticket.forEach((row, r) => {
+    const tr = document.createElement('tr');
+    row.forEach((val, c) => {
+      const td = document.createElement('td');
+      td.className = 'cell';
+      if (val !== '') {
+        td.innerText = val;
+        if (data.crossed.includes(val)) td.classList.add('crossed');
+        td.onclick = () => toggle(val);
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function toggle(num) {
+  let data = JSON.parse(localStorage.getItem(userKey));
+  if (data.crossed.includes(num)) {
+    data.crossed = data.crossed.filter(n => n !== num);
+  } else {
+    data.crossed.push(num);
+  }
+  localStorage.setItem(userKey, JSON.stringify(data));
+  render(data);
+}
+
+function resetTicket() {
+  if (!confirm('Reset ticket and crossed numbers?')) return;
+  localStorage.removeItem(userKey);
+  loadTicket();
+}
+
+loadTicket();
+</script>
 </body>
+</html>
