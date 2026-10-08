@@ -84,28 +84,6 @@ This project gives you **everything you need to host a game night**, using nothi
 
 ---
 
-## 💻 Run Locally
-
-```bash
-git clone https://github.com/hclpandv/tambola.git
-cd tambola
-# just open index.html in your browser, that's it!
-```
-
----
-
-## 📁 Project Structure
-
-```
-tambola/
-├── index.html   # 🎙️ Host's game board
-├── tkt.html     # 🎫 Player's ticket
-├── LICENSE
-└── README.md
-```
-
----
-
 ## 🗺️ Roadmap Ideas
 
 - [ ] 🔊 Voice announcement of numbers
